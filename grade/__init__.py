@@ -5,7 +5,7 @@ class DataType(Enum):
     maegz = 'MAEGZ'
     pdb = 'PDB'
     adme = 'ADME'
-    CSV = 'csv'
+    csv = 'CSV'
 
 class BioData(object):
     def __iit__(self, input, type):
@@ -39,26 +39,27 @@ class ScoringFunction(object):
 
     @property
     def initialize(self):
-        return self._scoring_function
+        pass
     @initialize.setter
     def initialize(self, sfunction):
 
         self._scoring_function = sfunction
 
-    def filter(self, input, threshold):
+    def filter(self, threshold):
         if not isinstance(input, BioData):
             raise Exception()
 
-    def separate(self, input, split_points):
+    def separate(self, split_points):
         if not isinstance(input, BioData):
             raise Exception()
 
 class Metrics(object):
-    def __init__(self, mae=None, pdb=None, adme=None):
+    def __init__(self, data):
         # INPUTS
-        self._mae = mae
-        self._pdb = pdb
-        self._adme = adme
+        if isinstance(data, BioData):
+            self._data = data
+        else:
+            raise Exception
         # METRICS
         # TODO: define functions for following params
         self._hbonds = None
@@ -101,4 +102,6 @@ data1.data = {'q1': {'a':1, 'b':2, 'c':3}, 'q2': {'q':33, 'w':32, 'e': 2}}
 data2 = BioData()
 data2.data = {'q1': {'sa':1, 'sb':2, 'sc':3}, 'q2': {'sq':33, 'sw':32, 'se': 2}}
 
-print data1 + data2
+my_sfunction = ScoringFunction()
+m = Metrics(data1 + data2)
+my_sfunction.initialize = m.hbonds + 0.3*m.docking_score + 2
