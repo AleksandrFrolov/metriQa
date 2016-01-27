@@ -1,4 +1,4 @@
-from enum import Enum
+from data import DataType
 
 class BioData(object):
     def __iit__(self, input, type):
@@ -7,18 +7,18 @@ class BioData(object):
         # TODO: function for read data file.
         self._data = None
 
+    def __add__(self, other):
+        pass
+
+    def __iadd__(self, other):
+        pass
+
     @property
     def data(self):
         return self._data
     @data.setter
     def data(self, d):
         self._data = d
-
-class DataType(Enum):
-    mae = 'MAE'
-    maegz = 'MAEGZ'
-    pdb = 'PDB'
-    adme = 'ADME'
 
 
 class ScoringFunction(object):
@@ -47,7 +47,7 @@ class Metrics(object):
         self._pdb = pdb
         self._adme = adme
         # METRICS
-        # TODO define functions for following params
+        # TODO: define functions for following params
         self._hbonds = None
         self._stacking = None
         self._docking_score = None
@@ -74,10 +74,10 @@ class Metrics(object):
 
 # ============Examples============
 
-my_data = BioData('path_to_file', DataType.mae)
+my_data = BioData('path_to_file', DataType.mae) + BioData('path_to_qikprop', DataType.adme)
+my_data += BioData('path_to_csv', DataType.csv)
 
 my_sfunction = ScoringFunction()
-
 my_sfunction.initialize = Metrics.hbonds + 0.3*Metrics.docking_score + 2
 
 result = my_sfunction.filter(my_data)
