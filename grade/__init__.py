@@ -72,7 +72,6 @@ class Metrics(object):
         self._docking_score = ds
 
 
-
 # ============Examples============
 
 my_data = BioData('path_to_file', DataType.mae)
