@@ -62,25 +62,50 @@ class Metrics(object):
             raise Exception
         # METRICS
         # TODO: define functions for following params
-        self._hbonds = None
-        self._stacking = None
-        self._docking_score = None
+        self._hbonds = self._get_data('hbonds')
+        self._stacking = self._get_data('stacking')
+        self._docking_score = self._get_data('docking_score')
+
+    # =======helper class=======
+    class MetricsVector(object):
+        def __init__(self, data):
+            if isinstance(data, BioData):
+                self._data = data
+            else:
+                raise Exception
+
+        def __add__(self, other):
+            pass
+        def __div__(self, other):
+            pass
+        def __floordiv__(self, other):
+            pass
+        def __cmp__(self, other):
+            pass
+        def __mul__(self, other):
+            pass
+
+    def get_data(self, name):
+        res = BioData()
+        res.data = dict([(self._data, self._data[s][name]) for s in self._data])
+        return Metrics(res)
+
 
     # ===========h-bond===========
     @property
     def hbonds(self):
-        return sum(self._hbonds.values()) if self._hbonds else 0
+        return self._hbonds
     @hbonds.setter
     def hbonds(self, hbonds_dict):
         self._hbonds = hbonds_dict
 
-    def hbond(self, ligand_atom):
-        return self._hbonds.get(ligand_atom, 0)
+    # def hbond(self, ligand_atom):
+    #     return self._hbonds.get(ligand_atom, 0)
 
     # ===========docking score===========
     @property
     def docking_score(self):
-        return self._docking_score or 0
+        return self._docking_score
     @docking_score.setter
     def docking_score(self, ds):
         self._docking_score = ds
