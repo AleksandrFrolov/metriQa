@@ -39,19 +39,16 @@ class ScoringFunction(object):
 
     @property
     def initialize(self):
-        pass
+        return True if self._scoring_function else False
     @initialize.setter
     def initialize(self, sfunction):
-
         self._scoring_function = sfunction
 
     def filter(self, threshold):
-        if not isinstance(input, BioData):
-            raise Exception()
+        pass
 
     def separate(self, split_points):
-        if not isinstance(input, BioData):
-            raise Exception()
+        pass
 
 class Metrics(object):
     def __init__(self, data):
@@ -66,30 +63,10 @@ class Metrics(object):
         self._stacking = self._get_data('stacking')
         self._docking_score = self._get_data('docking_score')
 
-    # =======helper class=======
-    class MetricsVector(object):
-        def __init__(self, data):
-            if isinstance(data, BioData):
-                self._data = data
-            else:
-                raise Exception
-
-        def __add__(self, other):
-            pass
-        def __div__(self, other):
-            pass
-        def __floordiv__(self, other):
-            pass
-        def __cmp__(self, other):
-            pass
-        def __mul__(self, other):
-            pass
-
-    def get_data(self, name):
+    def _get_data(self, name):
         res = BioData()
-        res.data = dict([(self._data, self._data[s][name]) for s in self._data])
-        return Metrics(res)
-
+        res.data = dict([(s, self._data.data[s].get(name)) for s in self._data.data])
+        return MetricsVector(res)
 
     # ===========h-bond===========
     @property
@@ -104,11 +81,44 @@ class Metrics(object):
 
     # ===========docking score===========
     @property
+    def stacking(self):
+        return self._stacking
+    @stacking.setter
+    def stacking(self, stacking):
+        self._stacking = stacking
+
+    # ===========docking score===========
+    @property
     def docking_score(self):
         return self._docking_score
     @docking_score.setter
     def docking_score(self, ds):
         self._docking_score = ds
+
+# =======helper class=======
+class MetricsVector(object):
+    def __init__(self, data):
+        self._data = data
+
+    def __add__(self, other):
+        self.data = dict([(k, self._data.data[k] + (other._data.data.get(k) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
+        return self
+    def __div__(self, other):
+        self.data = dict([(k, self._data.data[k] / (other._datadata.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
+        return self
+    def __floordiv__(self, other):
+        self.data = dict([(k, self._data.data[k] // (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
+        return self
+    def __mul__(self, other):
+        self.data = dict([(k, self._data.data[k] * (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
+        return self
+
+    @property
+    def data(self):
+        return self._data
+    @data.setter
+    def data(self, data):
+        self._data = data
 
 
 # ============Examples============
@@ -122,11 +132,13 @@ class Metrics(object):
 # result = my_sfunction.filter(my_data, 3.2)
 
 data1 = BioData()
-data1.data = {'q1': {'a':1, 'b':2, 'c':3}, 'q2': {'q':33, 'w':32, 'e': 2}}
+data1.data = {'q1': {'hbonds':1, 'docking_score':2, 'c':3}, 'q2': {'hbonds':33, 'docking_score':32, 'e': 2}}
 
 data2 = BioData()
-data2.data = {'q1': {'sa':1, 'sb':2, 'sc':3}, 'q2': {'sq':33, 'sw':32, 'se': 2}}
+data2.data = {'q1': {'stacking':1, 'd':2, 'sc':3}, 'q2': {'stacking':33, 'd':32, 'se': 2}}
 
 my_sfunction = ScoringFunction()
 m = Metrics(data1 + data2)
-my_sfunction.initialize = m.hbonds + 0.3*m.docking_score + 2
+print (m.docking_score + m.hbonds).data # Work
+print (m.docking_score + 3).data # Work
+print (m.docking_score + m.hbonds + 3).data # Error...
