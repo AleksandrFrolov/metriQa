@@ -8,7 +8,7 @@ class DataType(Enum):
     csv = 'CSV'
 
 class BioData(object):
-    def __iit__(self, input, type):
+    def __init__(self, input=None, type=None):
         self._input = input
         self._type = type
         # TODO: function for read data file.
@@ -102,23 +102,23 @@ class MetricsVector(object):
 
     def __add__(self, other):
         self.data = dict([(k, self._data.data[k] + (other._data.data.get(k) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return self
+        return MetricsVector(self)
     def __div__(self, other):
         self.data = dict([(k, self._data.data[k] / (other._datadata.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return self
+        return MetricsVector(self)
     def __floordiv__(self, other):
         self.data = dict([(k, self._data.data[k] // (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return self
+        return MetricsVector(self)
     def __mul__(self, other):
         self.data = dict([(k, self._data.data[k] * (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return self
+        return MetricsVector(self)
 
     @property
     def data(self):
         return self._data
     @data.setter
     def data(self, data):
-        self._data = data
+        self._data = MetricsVector(data).data
 
 
 # ============Examples============
@@ -139,6 +139,4 @@ data2.data = {'q1': {'stacking':1, 'd':2, 'sc':3}, 'q2': {'stacking':33, 'd':32,
 
 my_sfunction = ScoringFunction()
 m = Metrics(data1 + data2)
-print (m.docking_score + m.hbonds).data # Work
-print (m.docking_score + 3).data # Work
-print (m.docking_score + m.hbonds + 3).data # Error...
+print ((m.docking_score + m.hbonds + m.stacking + 3) // m.hbonds).data.data
