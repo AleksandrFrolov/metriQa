@@ -1,4 +1,11 @@
-from data import DataType
+from enum import Enum
+
+class DataType(Enum):
+    mae = 'MAE'
+    maegz = 'MAEGZ'
+    pdb = 'PDB'
+    adme = 'ADME'
+    CSV = 'csv'
 
 class BioData(object):
     def __iit__(self, input, type):
@@ -8,10 +15,12 @@ class BioData(object):
         self._data = None
 
     def __add__(self, other):
-        pass
+        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data.keys()])
+        return self
 
     def __iadd__(self, other):
-        pass
+        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data.keys()])
+        return self
 
     @property
     def data(self):
@@ -19,6 +28,9 @@ class BioData(object):
     @data.setter
     def data(self, d):
         self._data = d
+
+    def __str__(self):
+        return str(self._data)
 
 
 class ScoringFunction(object):
@@ -30,9 +42,10 @@ class ScoringFunction(object):
         return self._scoring_function
     @initialize.setter
     def initialize(self, sfunction):
+
         self._scoring_function = sfunction
 
-    def filter(self, input):
+    def filter(self, input, threshold):
         if not isinstance(input, BioData):
             raise Exception()
 
@@ -67,17 +80,25 @@ class Metrics(object):
     @property
     def docking_score(self):
         return self._docking_score or 0
-    @docking_score
+    @docking_score.setter
     def docking_score(self, ds):
         self._docking_score = ds
 
 
 # ============Examples============
 
-my_data = BioData('path_to_file', DataType.mae) + BioData('path_to_qikprop', DataType.adme)
-my_data += BioData('path_to_csv', DataType.csv)
+# my_data = BioData('path_to_file', DataType.mae) + BioData('path_to_qikprop', DataType.adme)
+# my_data += BioData('path_to_csv', DataType.csv)
+#
+# my_sfunction = ScoringFunction()
+# my_sfunction.initialize = Metrics.hbonds + 0.3*Metrics.docking_score + 2
+#
+# result = my_sfunction.filter(my_data, 3.2)
 
-my_sfunction = ScoringFunction()
-my_sfunction.initialize = Metrics.hbonds + 0.3*Metrics.docking_score + 2
+data1 = BioData()
+data1.data = {'q1': {'a':1, 'b':2, 'c':3}, 'q2': {'q':33, 'w':32, 'e': 2}}
 
-result = my_sfunction.filter(my_data)
+data2 = BioData()
+data2.data = {'q1': {'sa':1, 'sb':2, 'sc':3}, 'q2': {'sq':33, 'sw':32, 'se': 2}}
+
+print data1 + data2
