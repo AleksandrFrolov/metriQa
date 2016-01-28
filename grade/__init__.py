@@ -132,8 +132,8 @@ class ScoringFunction(object):
 
     def separate(self, split_points, direct='fwd'):
         baskets = []
-        start_point, end_point = 0, 0
-        for i in split_points:
+        start_point, end_point = 0, split_points[0]
+        for i in split_points[1:]:
             (start_point, end_point) = (end_point, i) if direct == 'fwd' else (i, end_point)
             baskets.append(self.filter(start_point, '>').intersect(self.filter(end_point, '<')))
         return baskets
@@ -155,4 +155,4 @@ sf.initialize = (m.hbonds + m.docking_score) * 0.3 + m.stacking
 print sf.filter(10, '<').data
 print sf.filter(100, '<').data
 
-print map(lambda x: x.data, sf.separate([3, 50, 100]))
+print map(lambda x: x.data, sf.separate([1, 50, 100]))
