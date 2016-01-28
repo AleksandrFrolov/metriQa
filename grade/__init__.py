@@ -1,25 +1,15 @@
-from enum import Enum
-
-class DataType(Enum):
-    mae = 'MAE'
-    maegz = 'MAEGZ'
-    pdb = 'PDB'
-    adme = 'ADME'
-    csv = 'CSV'
-
 class BioData(object):
-    def __init__(self, input=None, type=None):
-        self._input = input
+    def __init__(self, path=None, type=None):
+        self._path = path
         self._type = type
-        # TODO: function for read data file.
         self._data = None
 
     def __add__(self, other):
-        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data.keys()])
+        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data])
         return self
 
     def __iadd__(self, other):
-        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data.keys()])
+        self.data = dict([(k, dict(self.data[k], **other.data[k])) for k in self.data if k in other.data])
         return self
 
     @property
@@ -29,65 +19,66 @@ class BioData(object):
     def data(self, d):
         self._data = d
 
-    def __str__(self):
-        return str(self._data)
+class MetricData(object):
+    def __init__(self, data=None):
+        self._data = data
 
-
-class ScoringFunction(object):
-    def __init__(self):
-        self._scoring_function = None
+    def __add__(self, other):
+        if isinstance(self, MetricData) and isinstance(other, MetricData):
+            self.data = dict([(k, self.data[k] + other.data[k]) for k in self.data if k in other.data])
+        elif isinstance(self, MetricData):
+            self.data = dict([(k, self.data[k] + other) for k in self.data])
+        return self
+    def __sub__(self, other):
+        if isinstance(self, MetricData) and isinstance(other, MetricData):
+            self.data = dict([(k, self.data[k] - other.data[k]) for k in self.data if k in other.data])
+        elif isinstance(self, MetricData):
+            self.data = dict([(k, self.data[k] - other) for k in self.data])
+        return self
+    def __mul__(self, other):
+        if isinstance(self, MetricData) and isinstance(other, MetricData):
+            self.data = dict([(k, self.data[k] * other.data[k]) for k in self.data if k in other.data])
+        elif isinstance(self, MetricData):
+            self.data = dict([(k, self.data[k] * other) for k in self.data])
+        return self
+    def __div__(self, other):
+        if isinstance(self, MetricData) and isinstance(other, MetricData):
+            self.data = dict([(k, self.data[k] / other.data[k]) for k in self.data if k in other.data])
+        elif isinstance(self, MetricData):
+            self.data = dict([(k, self.data[k] / other) for k in self.data])
+        return self
+    def __floordiv__(self, other):
+        if isinstance(self, MetricData) and isinstance(other, MetricData):
+            self.data = dict([(k, self.data[k] // other.data[k]) for k in self.data if k in other.data])
+        elif isinstance(self, MetricData):
+            self.data = dict([(k, self.data[k] // other) for k in self.data])
+        return self
+    def intersect(self, other):
+        self.data = dict([(k, self.data[k]) for k in self.data if k in other.data])
+        return self
 
     @property
-    def initialize(self):
-        return True if self._scoring_function else False
-    @initialize.setter
-    def initialize(self, sfunction):
-        self._scoring_function = sfunction
+    def data(self):
+        return self._data
+    @data.setter
+    def data(self, d):
+        self._data = d
 
-    def filter(self, threshold):
-        pass
-
-    def separate(self, split_points):
-        pass
 
 class Metrics(object):
-    def __init__(self, data):
-        # INPUTS
-        if isinstance(data, BioData):
-            self._data = data
-        else:
-            raise Exception
-        # METRICS
-        # TODO: define functions for following params
+    def __init__(self, data=None):
+        self._data = data.data
         self._hbonds = self._get_data('hbonds')
-        self._stacking = self._get_data('stacking')
         self._docking_score = self._get_data('docking_score')
+        self._stacking = self._get_data('stacking')
 
-    def _get_data(self, name):
-        res = BioData()
-        res.data = dict([(s, self._data.data[s].get(name)) for s in self._data.data])
-        return MetricsVector(res)
-
-    # ===========h-bond===========
     @property
     def hbonds(self):
         return self._hbonds
     @hbonds.setter
-    def hbonds(self, hbonds_dict):
-        self._hbonds = hbonds_dict
+    def hbonds(self, hb):
+        self._hbonds = hb
 
-    # def hbond(self, ligand_atom):
-    #     return self._hbonds.get(ligand_atom, 0)
-
-    # ===========docking score===========
-    @property
-    def stacking(self):
-        return self._stacking
-    @stacking.setter
-    def stacking(self, stacking):
-        self._stacking = stacking
-
-    # ===========docking score===========
     @property
     def docking_score(self):
         return self._docking_score
@@ -95,48 +86,73 @@ class Metrics(object):
     def docking_score(self, ds):
         self._docking_score = ds
 
-# =======helper class=======
-class MetricsVector(object):
-    def __init__(self, data):
-        self._data = data
+    @property
+    def stacking(self):
+        return self._stacking
+    @stacking.setter
+    def stacking(self, st):
+        self._stacking = st
 
-    def __add__(self, other):
-        self.data = dict([(k, self._data.data[k] + (other._data.data.get(k) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return MetricsVector(self)
-    def __div__(self, other):
-        self.data = dict([(k, self._data.data[k] / (other._datadata.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return MetricsVector(self)
-    def __floordiv__(self, other):
-        self.data = dict([(k, self._data.data[k] // (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return MetricsVector(self)
-    def __mul__(self, other):
-        self.data = dict([(k, self._data.data[k] * (other._data.data.get(k, 0) if isinstance(other, MetricsVector) else other)) for k in self._data.data])
-        return MetricsVector(self)
+
+    def _get_data(self, name):
+        if not self._data:
+            raise Exception
+        res = MetricData()
+        res.data = dict([(k, self.data[k].get(name)) for k in self.data])
+        return res
 
     @property
     def data(self):
         return self._data
     @data.setter
-    def data(self, data):
-        self._data = MetricsVector(data).data
+    def data(self, d):
+        self._data = d
+
+
+class ScoringFunction(object):
+    def __init__(self):
+        self._sf = None
+
+    @property
+    def initialize(self):
+        pass
+    @initialize.setter
+    def initialize(self, sf):
+        self._sf = sf
+
+    def filter(self, treshold, metric):
+        res = MetricData()
+        if metric == '<':
+            res.data = dict([k, self._sf.data[k]] for k in self._sf.data if self._sf.data[k] < treshold)
+        if metric == '>':
+            res.data = dict([k, self._sf.data[k]] for k in self._sf.data if self._sf.data[k] >= treshold)
+        if metric == '==':
+            res.data = dict([k, self._sf.data[k]] for k in self._sf.data if self._sf.data[k] == treshold)
+        return res
+
+    def separate(self, split_points, direct='fwd'):
+        baskets = []
+        start_point, end_point = 0, 0
+        for i in split_points:
+            (start_point, end_point) = (end_point, i) if direct == 'fwd' else (i, end_point)
+            baskets.append(self.filter(start_point, '>').intersect(self.filter(end_point, '<')))
+        return baskets
 
 
 # ============Examples============
 
-# my_data = BioData('path_to_file', DataType.mae) + BioData('path_to_qikprop', DataType.adme)
-# my_data += BioData('path_to_csv', DataType.csv)
-#
-# my_sfunction = ScoringFunction()
-# my_sfunction.initialize = Metrics.hbonds + 0.3*Metrics.docking_score + 2
-#
-# result = my_sfunction.filter(my_data, 3.2)
-
 data1 = BioData()
-data1.data = {'q1': {'hbonds':1, 'docking_score':2, 'c':3}, 'q2': {'hbonds':33, 'docking_score':32, 'e': 2}}
+data1.data = {'q1': {'hbonds':2, 'docking_score':2, 'c':3}, 'q2': {'hbonds':33, 'docking_score':32, 'e': 2}}
 
 data2 = BioData()
 data2.data = {'q1': {'stacking':1, 'd':2, 'sc':3}, 'q2': {'stacking':33, 'd':32, 'se': 2}}
 
-my_sfunction = ScoringFunction()
 m = Metrics(data1 + data2)
-print ((m.docking_score + m.hbonds + m.stacking + 3) // m.hbonds).data.data
+sf = ScoringFunction()
+
+sf.initialize = (m.hbonds + m.docking_score) * 0.3 + m.stacking
+
+print sf.filter(10, '<').data
+print sf.filter(100, '<').data
+
+print map(lambda x: x.data, sf.separate([3, 50, 100]))
