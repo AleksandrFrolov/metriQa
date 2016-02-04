@@ -25,33 +25,33 @@ class MetricData(object):
 
     def __add__(self, other):
         if isinstance(self, MetricData) and isinstance(other, MetricData):
-            self.data = dict([(k, self.data[k] + other.data[k]) for k in self.data if k in other.data])
+            self.data = dict([(k, float(self.data[k]) + float(other.data[k])) for k in self.data if k in other.data])
         elif isinstance(self, MetricData):
-            self.data = dict([(k, self.data[k] + other) for k in self.data])
+            self.data = dict([(k, float(self.data[k]) + float(other)) for k in self.data])
         return self
     def __sub__(self, other):
         if isinstance(self, MetricData) and isinstance(other, MetricData):
-            self.data = dict([(k, self.data[k] - other.data[k]) for k in self.data if k in other.data])
+            self.data = dict([(k, float(self.data[k]) - float(other.data[k])) for k in self.data if k in other.data])
         elif isinstance(self, MetricData):
-            self.data = dict([(k, self.data[k] - other) for k in self.data])
+            self.data = dict([(k, float(self.data[k]) - float(other)) for k in self.data])
         return self
     def __mul__(self, other):
         if isinstance(self, MetricData) and isinstance(other, MetricData):
-            self.data = dict([(k, self.data[k] * other.data[k]) for k in self.data if k in other.data])
+            self.data = dict([(k, float(self.data[k]) * float(other.data[k])) for k in self.data if k in other.data])
         elif isinstance(self, MetricData):
-            self.data = dict([(k, self.data[k] * other) for k in self.data])
+            self.data = dict([(k, float(self.data[k]) * float(other)) for k in self.data])
         return self
     def __div__(self, other):
         if isinstance(self, MetricData) and isinstance(other, MetricData):
-            self.data = dict([(k, self.data[k] / other.data[k]) for k in self.data if k in other.data])
+            self.data = dict([(k, float(self.data[k]) / float(other.data[k])) for k in self.data if k in other.data])
         elif isinstance(self, MetricData):
-            self.data = dict([(k, self.data[k] / other) for k in self.data])
+            self.data = dict([(k, float(self.data[k]) / float(other)) for k in self.data])
         return self
     def __floordiv__(self, other):
         if isinstance(self, MetricData) and isinstance(other, MetricData):
-            self.data = dict([(k, self.data[k] // other.data[k]) for k in self.data if k in other.data])
+            self.data = dict([(k, float(self.data[k]) // float(other.data[k])) for k in self.data if k in other.data])
         elif isinstance(self, MetricData):
-            self.data = dict([(k, self.data[k] // other) for k in self.data])
+            self.data = dict([(k, float(self.data[k]) // float(other)) for k in self.data])
         return self
     def intersect(self, other):
         self.data = dict([(k, self.data[k]) for k in self.data if k in other.data])
