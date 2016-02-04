@@ -12,3 +12,15 @@ def qikprop_parser(csv_file):
         mol_data = dict(zip(header, line[1:]))
         res.append((mol_name, mol_data))
     return dict(res)
+
+def project_table_parser(data_file):
+    if not os.path.isfile(data_file):
+        raise IOError
+    res = []
+    data = csv.reader(open(data_file, 'r'))
+    header = data.next()[2:]
+    for line in data:
+        mol_name = line[1]
+        mol_data = dict(zip(header, line[2:]))
+        res.append((mol_name, mol_data))
+    return dict(res)
